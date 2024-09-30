@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalOverlay, ModalContainer, Input, Button } from './styles'
 
-// Definição da interface dos dados do aluno
+
 interface StudentData {
   nome: string;
   cep: string;
@@ -24,10 +24,28 @@ const ModalCreate: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setStudent({ ...student, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Aluno cadastrado:', student);
-    onClose(); // Fecha o modal ao submeter
+
+    try {
+      const response = await fetch('/api/alunos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(student),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Aluno cadastrado:', data);
+        onClose();
+      } else {
+        console.error('Erro ao cadastrar aluno:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
   };
 
   return (
