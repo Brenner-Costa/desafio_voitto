@@ -1,4 +1,3 @@
-import DashboardSidebar from '@/components/Organisms/Sibebars/DashboardSidebar';
 import React from 'react';
 import { ToastContainer } from 'react-toastify';
 
@@ -17,9 +16,6 @@ const Dashboard: React.FC<Props> = props => {
   return (
     <>
       <Container>
-        <aside>
-          <DashboardSidebar section={router.asPath} />
-        </aside>
         <main>
           <header>
             <h1>{props.title}</h1>
