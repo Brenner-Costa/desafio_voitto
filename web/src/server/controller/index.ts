@@ -38,9 +38,9 @@ const deleteById = async (id: string): Promise<void> => {
     await alunoRepository.deleteAluno(id);
 };
 
-const updateAluno = async(id: string): Promise<IAluno> => {
+// const updateAluno = async(id: string): Promise<IAluno> => {
 
-}
+// }
 
 export const alunoController = {
     createAluno,
