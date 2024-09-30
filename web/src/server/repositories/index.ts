@@ -10,6 +10,45 @@ const saveRequestAluno = async (aluno: IAluno): Promise<IAluno> => {
   return alunoCriado;
 };
 
+const getAllAlunos = async (): Promise<IAluno[]> => {
+  const alunos = await prisma.aluno.findMany();
+  return alunos;
+};
+
+const getByEmail = async (email: string) => {
+  const alunoEmail = await prisma.aluno.findFirst({
+    where: {
+      email: email, 
+    },
+  });
+
+  return alunoEmail;
+
+};
+
+const getById = async (id: string) => {
+  const  alunoId = await prisma.aluno.findFirst({
+    where: {
+      id: id,
+    },
+  });
+
+  return alunoId;
+
+};
+
+const deleteAluno = async (id: string): Promise<void> => {
+  await prisma.aluno.delete({
+    where: {
+      id: id,
+    },
+  });
+};
+
 export const alunoRepository = {
     saveRequestAluno,
+    getAllAlunos,
+    getByEmail,
+    getById,
+    deleteAluno,
 };

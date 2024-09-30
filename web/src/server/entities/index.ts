@@ -1,5 +1,5 @@
 export interface IAluno {
-    id?: number;
+    id?: string,
     nome: string;
     email: string;
     cep: string;
@@ -8,12 +8,10 @@ export interface IAluno {
 }
 
 export interface IcreateAlunoRequest {
-    id?: number;
+    id?: string,
     nome: string;
     email: string;
     cep: string;
     cidade: string;
     estado: string;
 }
-
-

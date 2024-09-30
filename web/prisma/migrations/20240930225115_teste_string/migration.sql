@@ -1,15 +1,6 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-DROP TABLE `User`;
-
 -- CreateTable
 CREATE TABLE `Aluno` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `nome` VARCHAR(180) NOT NULL,
     `email` VARCHAR(250) NOT NULL,
     `cep` VARCHAR(30) NOT NULL,
@@ -22,7 +13,7 @@ CREATE TABLE `Aluno` (
 
 -- CreateTable
 CREATE TABLE `Curso` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `nome` VARCHAR(300) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -30,9 +21,9 @@ CREATE TABLE `Curso` (
 
 -- CreateTable
 CREATE TABLE `CursoPessoa` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `alunoId` INTEGER NOT NULL,
-    `cursoId` INTEGER NOT NULL,
+    `id` VARCHAR(191) NOT NULL,
+    `alunoId` VARCHAR(191) NOT NULL,
+    `cursoId` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `CursoPessoa_alunoId_cursoId_key`(`alunoId`, `cursoId`),
     PRIMARY KEY (`id`)

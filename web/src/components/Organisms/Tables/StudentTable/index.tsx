@@ -7,53 +7,89 @@ import {
   BodyLine,
   Message,
   TableMobile,
-  Separator
 } from './styles';
 
-import { api } from '@/services/api';
 import { toast } from 'react-toastify';
 import useWindowSize from '@/hooks/useWindowSize';
 import { Button } from '@material-ui/core';
-import { buttonTheme } from '@/utils/Config';
-import ModalCreate from '../../Modal';
+import ModalCreate from '../../Modal/modalCreate';
+import ModalDelete from '../../Modal/modalDelete'; 
 
 const StudentTable: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
-  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false); // Estado para controlar o modal
+  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
+  const [isDeleteStudentModalOpen, setIsDeleteStudentModalOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<number | null>(null);
   const mobile = useWindowSize().width < 900;
 
   useEffect(() => {
-    api
-      .get('alunos')
-      .then(res => {
-        setStudents(res.data);
-      })
-      .catch(() => {
-        toast('Confira a API', {
-          position: toast.POSITION.BOTTOM_CENTER,
-          type: 'error',
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch('/api/alunos', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
-      });
+
+        if (response.ok) {
+          const data = await response.json();
+          setStudents(data.data); 
+        } else {
+          console.error('Erro ao buscar alunos:', response.statusText);
+          toast.error('Erro ao buscar alunos');
+        }
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+        toast.error('Erro na requisição');
+      }
+    };
+
+    fetchStudents();
   }, []);
 
-  // Função para abrir o modal de criação de aluno
   const openCreateStudentModal = (): void => {
     setIsCreateStudentModalOpen(true);
   };
 
-  // Função para fechar o modal de criação de aluno
   const closeCreateStudentModal = (): void => {
     setIsCreateStudentModalOpen(false);
   };
 
   const openDeleteStudentModal = (id: number): void => {
-    // Lógica para excluir o aluno
+    setStudentToDelete(id);
+    setIsDeleteStudentModalOpen(true);
+  };
+
+  const closeDeleteStudentModal = (): void => {
+    setStudentToDelete(null);
+    setIsDeleteStudentModalOpen(false);
+  };
+
+  const confirmDeleteStudent = async () => {
+    if (studentToDelete) {
+      try {
+        const response = await fetch(`/api/alunos?id=${studentToDelete}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(response)
+        if (response.ok) {
+          toast.success('Aluno excluído com sucesso!');
+          setStudents((prevStudents) => prevStudents.filter(student => student.id !== studentToDelete));
+        } else {
+          toast.error('Erro ao excluir aluno.');
+        }
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+        toast.error('Erro na requisição');
+      } finally {
+        closeDeleteStudentModal(); 
+      }
+    }
   };
 
   return (
@@ -61,15 +97,15 @@ const StudentTable: React.FC = () => {
       <header>
         <Button
           fullWidth
-          onClick={openCreateStudentModal} // Abre o modal ao clicar
+          onClick={openCreateStudentModal}
           color="primary"
-          variant={buttonTheme}
+          variant="contained"
         >
           Adicionar usuário
         </Button>
       </header>
 
-      {students ? (
+      {students.length > 0 ? (
         !mobile ? (
           <>
             <Table>
@@ -83,73 +119,30 @@ const StudentTable: React.FC = () => {
                 <Item> EDITAR </Item>
                 <Item> EXCLUIR </Item>
               </Head>
-              {students &&
-                students.map((student, key) => (
-                  <BodyLine key={key}>
-                    <Item> {student.id} </Item>
-                    <Item> {student.nome} </Item>
-                    <Item> {student.email} </Item>
-                    <Item> {student.cep} </Item>
-                    <Item> {student.estado} </Item>
-                    <Item> {student.cidade} </Item>
-                    <Item>
-                      <button>editar</button>
-                    </Item>
-                    <Item>
-                      <button
-                        onClick={() => openDeleteStudentModal(student.id)}
-                      >
-                        excluir
-                      </button>
-                    </Item>
-                  </BodyLine>
-                ))}
+              {students.map((student) => (
+                <BodyLine key={student.id}>
+                  <Item> {student.id} </Item>
+                  <Item> {student.nome} </Item>
+                  <Item> {student.email} </Item>
+                  <Item> {student.cep} </Item>
+                  <Item> {student.estado} </Item>
+                  <Item> {student.cidade} </Item>
+                  <Item>
+                    <button>Editar</button>
+                  </Item>
+                  <Item>
+                    <button onClick={() => openDeleteStudentModal(student.id)}>
+                      Excluir
+                    </button>
+                  </Item>
+                </BodyLine>
+              ))}
             </Table>
           </>
         ) : (
-          <>
-            {students &&
-              students.map((student, key) => (
-                <TableMobile key={key}>
-                  <Head>
-                    <Item> ID </Item>
-                  </Head>
-                  <BodyLine>
-                    <Item> {student.id} </Item>
-                  </BodyLine>
-                  <Head>
-                    <Item> Nome </Item>
-                  </Head>
-                  <BodyLine>
-                    <Item> {student.nome} </Item>
-                  </BodyLine>
-                  <Head>
-                    <Item> Email </Item>
-                  </Head>
-                  <BodyLine>
-                    <Item> {student.email} </Item>
-                  </BodyLine>
-                  <Head>
-                    <Item> Cep </Item>
-                  </Head>
-                  <BodyLine>
-                    <Item> {student.cep} </Item>
-                  </BodyLine>
-                  <Head>
-                    <Item> Estado</Item>
-                  </Head>
-                  <BodyLine>
-                    <Item> {student.estado} </Item>
-                  </BodyLine>
-                  <Head>
-                    <Item>Cidade </Item>
-                  </Head>
-                  <BodyLine>
-                    <Item> {student.cidade} </Item>
-                  </BodyLine>
-                </TableMobile>
-              ))}
-          </>
+          <TableMobile>
+            {/* Renderizar a versão mobile aqui */}
+          </TableMobile>
         )
       ) : (
         <Message>
@@ -158,7 +151,15 @@ const StudentTable: React.FC = () => {
       )}
 
       {isCreateStudentModalOpen && (
-        <ModalCreate onClose={closeCreateStudentModal} /> // Renderiza o modal de criação se estiver aberto
+        <ModalCreate onClose={closeCreateStudentModal} />
+      )}
+      {isDeleteStudentModalOpen && (
+        <ModalDelete
+          open={isDeleteStudentModalOpen}
+          onClose={closeDeleteStudentModal}
+          onConfirm={confirmDeleteStudent}
+          studentName={students.find(student => student.id === studentToDelete)?.nome || ''} 
+        />
       )}
     </Container>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ModalOverlay, ModalContainer, Input, Button } from './styles'
+import { toast } from 'react-toastify';
 
 
 interface StudentData {
@@ -11,7 +12,6 @@ interface StudentData {
 }
 
 const ModalCreate: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    console.log("teste")
   const [student, setStudent] = useState<StudentData>({
     nome: '',
     cep: '',
@@ -41,10 +41,13 @@ const ModalCreate: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         console.log('Aluno cadastrado:', data);
         onClose();
       } else {
-        console.error('Erro ao cadastrar aluno:', response.statusText);
+        const errorData = await response.json();
+        console.error('Erro ao cadastrar aluno:', errorData.message);
+        toast.error(errorData.message);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
+      toast.error('Erro na requisição');
     }
   };
 
