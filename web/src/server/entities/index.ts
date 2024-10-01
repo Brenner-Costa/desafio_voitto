@@ -15,3 +15,8 @@ export interface IcreateAlunoRequest {
     cidade: string;
     estado: string;
 }
+
+export interface ICurso {
+    id: string;
+    nome: string;
+}

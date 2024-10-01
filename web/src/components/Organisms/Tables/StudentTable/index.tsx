@@ -51,7 +51,7 @@ const StudentTable: React.FC = () => {
 
   useEffect(() => {
     if (shouldFetch) {
-      fetchStudents();
+      fetchStudents(); // 
     }
   }, [shouldFetch]);
 
@@ -117,7 +117,7 @@ const StudentTable: React.FC = () => {
   };
 
   const handleStudentCreated = () => {
-    setShouldFetch(true); // Após criar um novo aluno, buscar novamente os dados
+    setShouldFetch(true); 
   };
 
   return (

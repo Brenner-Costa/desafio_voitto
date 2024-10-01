@@ -1,7 +1,7 @@
 //CONTROLLER
 
 import { NextApiRequest, NextApiResponse } from "next";
-import { alunoController } from "server/controller";
+import { alunoController } from "server/controller/aluno";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse ) {
     const { method, query, headers, body } = req;

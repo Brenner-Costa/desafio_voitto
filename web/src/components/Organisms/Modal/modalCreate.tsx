@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ModalOverlay, ModalContainer, Input, Button } from './styles'
+import { ModalOverlay, ModalContainer, Input, Button, Select } from './styles';
 import { toast } from 'react-toastify';
+import { IAluno, ICurso } from 'server/entities';
 
-
-interface StudentData {
-  nome: string;
-  cep: string;
-  email: string;
-  estado: string;
-  cidade: string;
+interface StudentData extends IAluno {
+  cursoId: string; 
 }
 
 interface ModalCreateProps {
@@ -23,9 +19,29 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
     email: '',
     estado: '',
     cidade: '',
+    cursoId: '',
   });
+  const [cursos, setCursos] = useState<ICurso[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const fetchCursos = async () => {
+      try {
+        const response = await fetch('/api/cursos');
+        if (!response.ok) {
+          throw new Error('Erro ao buscar cursos');
+        }
+        const data = await response.json();
+        setCursos(data.data); // Certifique-se de que isso é um array
+      } catch (error) {
+        console.error('Erro ao buscar cursos:', error);
+        toast.error('Erro ao carregar cursos');
+      }
+    };
+
+    fetchCursos();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setStudent({ ...student, [e.target.name]: e.target.value });
   };
 
@@ -62,46 +78,17 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
       <ModalContainer>
         <h2>Cadastro de Aluno</h2>
         <form onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            name="nome"
-            placeholder="Nome"
-            value={student.nome}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="text"
-            name="cep"
-            placeholder="CEP"
-            value={student.cep}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={student.email}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="text"
-            name="estado"
-            placeholder="Estado"
-            value={student.estado}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="text"
-            name="cidade"
-            placeholder="Cidade"
-            value={student.cidade}
-            onChange={handleChange}
-            required
-          />
+          <Input type="text" name="nome" placeholder="Nome" value={student.nome} onChange={handleChange} required />
+          <Input type="text" name="cep" placeholder="CEP" value={student.cep} onChange={handleChange} required />
+          <Input type="email" name="email" placeholder="Email" value={student.email} onChange={handleChange} required />
+          <Input type="text" name="estado" placeholder="Estado" value={student.estado} onChange={handleChange} required />
+          <Input type="text" name="cidade" placeholder="Cidade" value={student.cidade} onChange={handleChange} required />
+          <Select name="cursoId" value={student.cursoId} onChange={handleChange} required>
+            <option value="">Selecione um curso</option>
+            {cursos.map(curso => (
+              <option key={curso.id} value={curso.id}>{curso.nome}</option>
+            ))}
+          </Select>
           <Button type="submit">Cadastrar</Button>
           <Button type="button" onClick={onClose} style={{ backgroundColor: '#ff0000' }}>
             Cancelar

@@ -1,7 +1,7 @@
 import { IcreateAlunoRequest, IAluno } from "../entities";
 import prisma from "../../../lib/prisma";
-import { alunoRepository } from "server/repositories";
-
+import { alunoRepository } from "server/repositories/aluno";
+import { cursoPessoaRepository } from "server/repositories/cursoAluno"; 
 
 const createAluno = async (request: IcreateAlunoRequest): Promise<IAluno> => {
     const existingEmail = await alunoRepository.getByEmail(request.email);
@@ -30,11 +30,11 @@ const getAlunos = async (): Promise<IAluno[]> => {
 
 const deleteById = async (id: string): Promise<void> => {
     const existingAluno = await alunoRepository.getById(id);
-  
+
     if (!existingAluno) {
-      throw new Error("Este aluno não existe!");
+        throw new Error("Este aluno não existe!");
     }
-  
+
     await alunoRepository.deleteAluno(id);
 };
 
@@ -63,9 +63,23 @@ const updateAluno = async (id: string, request: IcreateAlunoRequest): Promise<IA
     return alunoAtualizado;
 };
 
+
+const getAlunoById = async (id: string): Promise<IAluno & { cursos: any[] }> => {
+    const aluno = await alunoRepository.getById(id);
+
+    if (!aluno) {
+        throw new Error("Aluno não encontrado");
+    }
+
+    const cursos = await cursoPessoaRepository.getCursosByAlunoId(id);
+
+    return { ...aluno, cursos };
+};
+
 export const alunoController = {
     createAluno,
     getAlunos,
     deleteById,
-    updateAluno
+    updateAluno,
+    getAlunoById 
 }

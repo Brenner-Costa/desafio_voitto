@@ -30,6 +30,9 @@ const getById = async (id: string) => {
   const  alunoId = await prisma.aluno.findFirst({
     where: {
       id: id,
+    }, 
+    include: {
+      cursos: true
     },
   });
 

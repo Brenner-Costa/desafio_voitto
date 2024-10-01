@@ -5,7 +5,7 @@ export const NavContainer = styled.nav`
   justify-content: space-around;
   align-items: center;
   padding: 10px 20px;
-  background-color: blue;
+  background-color: black;
   color: #fff;
 `;
 

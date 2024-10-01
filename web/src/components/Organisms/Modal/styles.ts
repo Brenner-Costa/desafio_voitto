@@ -37,6 +37,22 @@ export const Input = styled.input`
   font-size: 16px;
 `;
 
+export const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #0070f3; /* Altera a cor da borda ao focar */
+    outline: none; /* Remove o contorno padrão */
+  }
+`;
+
 export const Button = styled.button`
   width: 100%;
   padding: 10px;
