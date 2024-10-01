@@ -13,40 +13,47 @@ import { toast } from 'react-toastify';
 import useWindowSize from '@/hooks/useWindowSize';
 import { Button } from '@material-ui/core';
 import ModalCreate from '../../Modal/modalCreate';
-import ModalDelete from '../../Modal/modalDelete'; 
+import ModalDelete from '../../Modal/modalDelete';
+import ModalEdit from '../../Modal/modalEdit'; 
 
 const StudentTable: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
   const [isDeleteStudentModalOpen, setIsDeleteStudentModalOpen] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState<number | null>(null);
+  const [isEditStudentModalOpen, setIsEditStudentModalOpen] = useState(false); 
+  const [studentToDelete, setStudentToDelete] = useState<String | null>(null);
+  const [studentToEdit, setStudentToEdit] = useState<Student | null>(null); 
+  const [shouldFetch, setShouldFetch] = useState(true); // Controla quando buscar os estudantes
   const mobile = useWindowSize().width < 900;
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await fetch('/api/alunos', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch('/api/alunos', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setStudents(data.data); 
-        } else {
-          console.error('Erro ao buscar alunos:', response.statusText);
-          toast.error('Erro ao buscar alunos');
-        }
-      } catch (error) {
-        console.error('Erro na requisição:', error);
-        toast.error('Erro na requisição');
+      if (response.ok) {
+        const data = await response.json();
+        setStudents(data.data); 
+        setShouldFetch(false); // Evita busca contínua
+      } else {
+        console.error('Erro ao buscar alunos:', response.statusText);
+        toast.error('Erro ao buscar alunos');
       }
-    };
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      toast.error('Erro na requisição');
+    }
+  };
 
-    fetchStudents();
-  }, []);
+  useEffect(() => {
+    if (shouldFetch) {
+      fetchStudents();
+    }
+  }, [shouldFetch]);
 
   const openCreateStudentModal = (): void => {
     setIsCreateStudentModalOpen(true);
@@ -56,7 +63,7 @@ const StudentTable: React.FC = () => {
     setIsCreateStudentModalOpen(false);
   };
 
-  const openDeleteStudentModal = (id: number): void => {
+  const openDeleteStudentModal = (id: String): void => {
     setStudentToDelete(id);
     setIsDeleteStudentModalOpen(true);
   };
@@ -64,6 +71,16 @@ const StudentTable: React.FC = () => {
   const closeDeleteStudentModal = (): void => {
     setStudentToDelete(null);
     setIsDeleteStudentModalOpen(false);
+  };
+
+  const openEditStudentModal = (student: Student): void => {
+    setStudentToEdit(student);
+    setIsEditStudentModalOpen(true);
+  };
+
+  const closeEditStudentModal = (): void => {
+    setStudentToEdit(null);
+    setIsEditStudentModalOpen(false);
   };
 
   const confirmDeleteStudent = async () => {
@@ -76,7 +93,6 @@ const StudentTable: React.FC = () => {
           },
         });
 
-        console.log(response)
         if (response.ok) {
           toast.success('Aluno excluído com sucesso!');
           setStudents((prevStudents) => prevStudents.filter(student => student.id !== studentToDelete));
@@ -90,6 +106,18 @@ const StudentTable: React.FC = () => {
         closeDeleteStudentModal(); 
       }
     }
+  };
+
+  const handleEditStudent = (updatedStudent: Student) => {
+    setStudents((prevStudents) =>
+      prevStudents.map((student) => 
+        student.id === updatedStudent.id ? updatedStudent : student
+      )
+    );
+  };
+
+  const handleStudentCreated = () => {
+    setShouldFetch(true); // Após criar um novo aluno, buscar novamente os dados
   };
 
   return (
@@ -128,7 +156,7 @@ const StudentTable: React.FC = () => {
                   <Item> {student.estado} </Item>
                   <Item> {student.cidade} </Item>
                   <Item>
-                    <button>Editar</button>
+                    <button onClick={() => openEditStudentModal(student)}>Editar</button>
                   </Item>
                   <Item>
                     <button onClick={() => openDeleteStudentModal(student.id)}>
@@ -151,7 +179,14 @@ const StudentTable: React.FC = () => {
       )}
 
       {isCreateStudentModalOpen && (
-        <ModalCreate onClose={closeCreateStudentModal} />
+        <ModalCreate onClose={closeCreateStudentModal} onStudentCreated={handleStudentCreated} />
+      )}
+      {isEditStudentModalOpen && studentToEdit && (
+        <ModalEdit 
+          onClose={closeEditStudentModal} 
+          student={studentToEdit} 
+          onEdit={handleEditStudent} 
+        />
       )}
       {isDeleteStudentModalOpen && (
         <ModalDelete

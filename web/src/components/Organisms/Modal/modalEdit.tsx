@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ModalOverlay, ModalContainer, Input, Button } from './styles'
+import { ModalOverlay, ModalContainer, Input, Button } from './styles';
 import { toast } from 'react-toastify';
 
-
 interface StudentData {
+  id: string;
   nome: string;
   cep: string;
   email: string;
@@ -11,62 +11,55 @@ interface StudentData {
   cidade: string;
 }
 
-interface ModalCreateProps {
-  onClose: () => void;
-  onStudentCreated: () => void; 
-}
+const ModalEdit: React.FC<{ onClose: () => void; student: StudentData; onEdit: (student: StudentData) => void; }> = ({ onClose, student, onEdit }) => {
+  const [editedStudent, setEditedStudent] = useState<StudentData>(student);
 
-const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) => {
-  const [student, setStudent] = useState<StudentData>({
-    nome: '',
-    cep: '',
-    email: '',
-    estado: '',
-    cidade: '',
-  });
+  useEffect(() => {
+    setEditedStudent(student);
+  }, [student]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStudent({ ...student, [e.target.name]: e.target.value });
+    setEditedStudent({ ...editedStudent, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/alunos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(student),
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Aluno cadastrado:', data);
-        onStudentCreated();
-        onClose(); 
-      } else {
-        const errorData = await response.json();
-        console.error('Erro ao cadastrar aluno:', errorData.message);
-        toast.error(errorData.message);
-      }
+        const response = await fetch(`/api/alunos?id=${editedStudent.id}`, {
+            method: 'PUT', 
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(editedStudent), 
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Aluno editado:', data);
+            onEdit(editedStudent);
+            onClose(); 
+        } else {
+            const errorData = await response.json();
+            console.error('Erro ao editar aluno:', errorData.message);
+            toast.error(errorData.message);
+        }
     } catch (error) {
-      console.error('Erro na requisição:', error);
-      toast.error('Erro na requisição');
+        console.error('Erro na requisição:', error);
+        toast.error('Erro na requisição');
     }
-  };
-
+};
   return (
     <ModalOverlay>
       <ModalContainer>
-        <h2>Cadastro de Aluno</h2>
+        <h2>Edição de Aluno</h2>
         <form onSubmit={handleSubmit}>
           <Input
             type="text"
             name="nome"
             placeholder="Nome"
-            value={student.nome}
+            value={editedStudent.nome}
             onChange={handleChange}
             required
           />
@@ -74,7 +67,7 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
             type="text"
             name="cep"
             placeholder="CEP"
-            value={student.cep}
+            value={editedStudent.cep}
             onChange={handleChange}
             required
           />
@@ -82,7 +75,7 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
             type="email"
             name="email"
             placeholder="Email"
-            value={student.email}
+            value={editedStudent.email}
             onChange={handleChange}
             required
           />
@@ -90,7 +83,7 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
             type="text"
             name="estado"
             placeholder="Estado"
-            value={student.estado}
+            value={editedStudent.estado}
             onChange={handleChange}
             required
           />
@@ -98,11 +91,11 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
             type="text"
             name="cidade"
             placeholder="Cidade"
-            value={student.cidade}
+            value={editedStudent.cidade}
             onChange={handleChange}
             required
           />
-          <Button type="submit">Cadastrar</Button>
+          <Button type="submit">Salvar</Button>
           <Button type="button" onClick={onClose} style={{ backgroundColor: '#ff0000' }}>
             Cancelar
           </Button>
@@ -112,4 +105,4 @@ const ModalCreate: React.FC<ModalCreateProps> = ({ onClose, onStudentCreated }) 
   );
 };
 
-export default ModalCreate;
+export default ModalEdit;

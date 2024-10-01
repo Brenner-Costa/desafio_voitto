@@ -45,10 +45,23 @@ const deleteAluno = async (id: string): Promise<void> => {
   });
 };
 
+const updateAluno = async (id: string, aluno: IAluno): Promise<IAluno> => {
+  const alunoAtualizado = await prisma.aluno.update({
+      where: {
+          id: id,
+      },
+      data: aluno,
+  });
+
+  return alunoAtualizado;
+};
+
+
 export const alunoRepository = {
     saveRequestAluno,
     getAllAlunos,
     getByEmail,
     getById,
     deleteAluno,
+    updateAluno,
 };

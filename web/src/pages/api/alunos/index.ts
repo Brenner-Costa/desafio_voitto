@@ -32,6 +32,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse 
             return res.status(204).end();
         }
 
+        if( method === "PUT") {
+            if (Array.isArray(userId)) {
+                throw new Error('Múltiplos IDs não são suportados.');
+            }
+
+            if (!userId || typeof userId !== 'string') {
+                return res.status(400).json({ message: 'ID inválido.' });
+            }
+
+            const response = await alunoController.updateAluno(userId, body);
+            return res.status(200).json({ data: response });
+        }
+
         return res.status(503).json({ message: "Método incompatível" });
 
     } catch (error) {
